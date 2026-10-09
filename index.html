@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VibeBoss.ai – Aus Code werden Videos. Automatisch.</title>
+<meta name="description" content="VibeBoss scannt Repository, Commits und Release Notes und macht daraus automatisch fertige Feature-Videos – mit Skript, Voice-over, Szenen und Untertiteln.">
+<meta name="theme-color" content="#050605">
+<link rel="icon" href="assets/brand/vibeboss-icon-square.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/img/presenter-wide.webp" type="image/webp" fetchpriority="high">
+<link rel="stylesheet" href="assets/css/style.css?v=9">
+<script>
+/* Theme + Sprache vor dem ersten Rendern setzen (kein Aufblitzen) */
+(function(){try{var t=localStorage.getItem('vb-theme');if(t)document.documentElement.dataset.theme=t;
+var l=localStorage.getItem('vb-lang')||((navigator.language||'de').toLowerCase().indexOf('de')===0?'de':'en');
+document.documentElement.lang=l;}catch(e){}})();
+</script>
+</head>
+<body>
+
+<!-- ============ ICON SPRITE ============ -->
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="vb" stroke="none" viewBox="40 110 432 290"><path fill="currentColor" fill-rule="evenodd" d="M435.25 146L425.50 138.50L420 135.25L413 132L399.50 128L391.50 127L358.25 127L318.50 191L318.50 191.75L375.50 192L380.25 193L384.75 195.75L387.50 198.50L389.75 202.50L390.75 209.25L389.75 214L387.25 218.25L382.25 222.50L378.75 224L375.50 224.50L301.25 224.50L300 225.75L262.25 287L262.50 288L377.50 288.25L380 289L384.50 291.75L387.75 295.25L390 300L390.50 303.25L390 308.50L387.75 313.25L386 315.50L383.25 317.75L380.50 319.25L375 320.50L241.25 320.50L240 321.75L201.50 383.75L201.50 384.75L388 384.50L402 381.75L408.25 379.50L417.25 375.25L423.50 371.75L427.75 368.75L432.25 365L439.25 358L445.50 350.25L449.25 344.25L452.75 337.25L455.50 330.25L457.50 322.25L458.75 314L458.75 299.75L457.75 295L457.75 292.75L455.50 283.50L451.75 274.75L448.50 269L443.75 262.75L440 258.50L432.50 251.50L432.50 251L443.75 237.75L447.75 231.75L451 225.50L453.25 220L455.75 211.25L455.75 208.50L456.75 202.75L457 194.50L455.75 181.75L453.75 174.50L451.50 168.75L448.25 162.25L440.50 151.50ZM181.25 378.50L335.75 128L335.75 127L283.75 127L277.75 128L273 130L267.50 134L261 142.75L196.50 248L195.75 247.50L195.75 246.75L189.75 234.75L183.75 223.75L144.75 146.75L141.25 140.75L135.50 134.50L131.25 131.50L127.25 129.50L123.50 128.25L117.25 127L53 127.25L130 278.25L131 279.50L131 280.25L132 281.50L142 301.75L148 312.75L153 323.25L154 324.50L159 335L159.75 335.75L175 366.25L176 367.50Z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.8 3.8 5.8 3.8 9s-1.200 6.200-3.800 9c-2.600-2.800-3.800-5.800-3.800-9S9.400 5.800 12 3z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.200"/><path d="M12 2.500v2.200M12 19.300v2.200M2.500 12h2.200M19.300 12h2.200M5.300 5.300l1.600 1.600M17.100 17.100l1.600 1.600M5.300 18.700l1.600-1.600M17.100 6.900l1.600-1.600"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.500 14.200A8.500 8.500 0 0 1 9.800 3.500a8.500 8.500 0 1 0 10.700 10.700z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 5.500l6.500 6.500-6.500 6.500" stroke-width="2.300"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-1.500a4 4 0 0 0-4-4H6.500a4 4 0 0 0-4 4V20"/><circle cx="9.200" cy="7.500" r="3.700"/><path d="M21.500 20v-1.500a4 4 0 0 0-3-3.900M15.500 3.900a3.700 3.700 0 0 1 0 7.200"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.200l3.300 2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2.500H7a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.500z"/><path d="M14 2.500v5h5M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.500" cy="10.500" r="6.800"/><path d="m20.500 20.500-5.200-5.200"/></symbol>
+    <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6.500" r="3"/><circle cx="6" cy="17.500" r="3"/><path d="M8.300 8.500 20 19M8.300 15.500 20 5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2.500" width="6" height="11.500" rx="3"/><path d="M5.500 11.500a6.500 6.500 0 0 0 13 0M12 18v3.500"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.500v5.500M12 16.300v.2" stroke-width="2.400"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.500" rx="8" ry="3"/><path d="M4 5.500v13c0 1.700 3.600 3 8 3s8-1.300 8-3v-13M4 12c0 1.700 3.600 3 8 3s8-1.300 8-3"/></symbol>
+    <symbol id="i-playc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.300v7.400l6-3.700z" fill="currentColor"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6.500" cy="5" r="2.300"/><circle cx="6.500" cy="19" r="2.300"/><circle cx="17.500" cy="8" r="2.300"/><path d="M6.500 7.300v9.400M17.500 10.300c0 4-5 3.200-11 5.700"/></symbol>
+    <symbol id="i-camoff" viewBox="0 0 24 24"><path d="M3 3l18 18M9.500 5.500H15l1.500 2.500h3a2 2 0 0 1 2 2v8M18 19.500H4.500a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2H6"/></symbol>
+    <symbol id="i-usersoff" viewBox="0 0 24 24"><path d="M3 3l18 18M14 20v-1.500a4 4 0 0 0-4-4H6.500a4 4 0 0 0-4 4V20"/><circle cx="8.500" cy="8.500" r="3.200"/><path d="M15.500 4.200a3.500 3.500 0 0 1 2 6M21.500 19.500v-1a4 4 0 0 0-2.500-3.700"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3.500 13.500H12l-1 8.500 9.500-11.500H12z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M16.500 3.500a2.100 2.100 0 0 1 3 3L7.500 18.500l-4 1 1-4z"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.500"/><circle cx="8.500" cy="9.500" r="1.600"/><path d="m21 15.500-4.500-4.500L7 20"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3.500 12a8.500 8.500 0 0 1 14.600-5.900L20.500 8.500M20.500 3.500v5h-5M20.500 12a8.500 8.500 0 0 1-14.600 5.900L3.500 15.500M3.500 20.500v-5h5"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.400 0 2-.900 2-1.900 0-1.600-1-1.900-1-3.100 0-1 .800-1.800 1.800-1.800H17a4 4 0 0 0 4-4c0-4-4-7.200-9-7.200z"/><circle cx="7.500" cy="11.500" r=".9" fill="currentColor"/><circle cx="10.500" cy="7.500" r=".9" fill="currentColor"/><circle cx="15" cy="7.800" r=".9" fill="currentColor"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M3.500 10v4a1.500 1.500 0 0 0 1.500 1.500h2.500L15 20V4L7.500 8.500H5A1.500 1.500 0 0 0 3.500 10z" fill="currentColor"/><path d="M18.500 9a4 4 0 0 1 0 6M8 15.500l1.200 4.500"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.500 5l-3 14" stroke-width="2.300"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2.500 21h19M8 7h1M11 7h1M8 11h1M11 11h1M8 15h1M11 15h1"/></symbol>
+    <symbol id="i-mobile" viewBox="0 0 24 24"><rect x="6.500" y="2.500" width="11" height="19" rx="2.500"/><path d="M11 18h2"/></symbol>
+    <symbol id="i-hash" viewBox="0 0 24 24"><path d="M5 9h15M4 15h15M10 3.500 8 20.500M16 3.500l-2 17" stroke-width="2.300"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.500 4 5.500V11c0 5 3.400 8.800 8 10.500 4.600-1.700 8-5.500 8-10.500V5.500z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.500 4.500 0 0 0 6.400 0l3-3A4.500 4.500 0 0 0 13 4.600l-1.200 1.200M14 10a4.500 4.500 0 0 0-6.400 0l-3 3A4.500 4.500 0 0 0 11 19.400l1.200-1.200" stroke-width="2.300"/></symbol>
+    <symbol id="i-brush" viewBox="0 0 24 24"><path d="M20.500 3.500c-4 1.500-8.500 6-10 9.500l2.500 2.500c3.500-1.500 8-6 9.500-10zM9 14.500c-2.500 0-3.500 2-3.500 3.500 0 1-.800 2-2 2.500 3 1 7.500-.500 7.500-4z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" stroke-width="2.800"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M10 3c.500 4 1.700 5.500 6 6.500-4.300 1-5.500 2.500-6 6.500-.500-4-1.700-5.500-6-6.500 4.300-1 5.500-2.500 6-6.500zM18 14c.300 2 .900 2.700 3 3.200-2.100.500-2.700 1.200-3 3.300-.300-2.100-.900-2.800-3-3.300 2.100-.500 2.700-1.200 3-3.200z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.500h11M9 12h11M9 17.500h11M4.500 6.500h.01M4.500 12h.01M4.500 17.500h.01" stroke-width="2.300"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.500" width="18" height="17" rx="3"/><path d="M8 2.500v4M16 2.500v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 17.500h.01M12 17.500h.01" stroke-width="2.200"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.500v5h3.500L12 18.500v-13L7.500 9.500z" fill="currentColor"/><path d="M15.500 9a4 4 0 0 1 0 6M18 6.500a7.500 7.500 0 0 1 0 11"/></symbol>
+    <symbol id="i-bug" viewBox="0 0 24 24"><path d="M12 21a6 6 0 0 0 6-6v-3a6 6 0 0 0-12 0v3a6 6 0 0 0 6 6zM12 8V5M8.500 5.500 7 3.500M15.500 5.500 17 3.500M6 13H3M21 13h-3M6.500 17.500 4 19M17.500 17.500 20 19"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8.500-6 1.500 3.500 6-2.500 1.500L10.500 14 6 18z" fill="#fff" stroke="#111" stroke-width="1.400"/></symbol>
+  <symbol id="i-play" stroke="none" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.200v13.600a.8.800 0 0 0 1.200.7l11-6.800a.8.800 0 0 0 0-1.400l-11-6.800a.8.800 0 0 0-1.200.7z"/></symbol>
+  <symbol id="i-star" stroke="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.200l2.950 6.100 6.700.95-4.850 4.700 1.150 6.650L12 17.450l-5.950 3.150 1.150-6.650-4.850-4.700 6.700-.95z"/></symbol>
+  <!-- Fremd-Logos (vereinfacht) -->
+  <symbol id="b-github" stroke="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.500 11.500 0 0 0-3.640 22.410c.580.100.790-.250.790-.560v-2.150c-3.200.700-3.880-1.360-3.880-1.360-.520-1.330-1.280-1.690-1.280-1.690-1.050-.720.080-.700.080-.700 1.160.080 1.770 1.190 1.770 1.190 1.030 1.770 2.700 1.260 3.360.960.100-.750.400-1.260.730-1.550-2.550-.290-5.240-1.280-5.240-5.690 0-1.260.450-2.290 1.190-3.090-.120-.290-.520-1.460.110-3.050 0 0 .970-.310 3.170 1.180a11 11 0 0 1 5.780 0c2.200-1.490 3.170-1.180 3.170-1.180.630 1.590.230 2.760.110 3.050.740.800 1.190 1.830 1.190 3.090 0 4.420-2.690 5.390-5.260 5.680.410.360.780 1.060.780 2.140v3.170c0 .310.210.670.800.560A11.500 11.500 0 0 0 12 .5z"/></symbol>
+  <symbol id="b-gitlab" stroke="none" viewBox="0 0 24 24"><path fill="#E24329" d="m12 22 4.200-12.900H7.800z"/><path fill="#FC6D26" d="m12 22-4.200-12.900H2.200zM12 22l4.200-12.900h5.600z"/><path fill="#FCA326" d="M2.200 9.100.9 13a.9.900 0 0 0 .3 1L12 22zM21.800 9.100l1.300 3.900a.9.900 0 0 1-.3 1L12 22z"/><path fill="#E24329" d="M2.200 9.100h5.600L5.400 1.700a.4.400 0 0 0-.8 0zM21.800 9.100h-5.600l2.400-7.400a.4.400 0 0 1 .8 0z"/></symbol>
+  <symbol id="b-bitbucket" stroke="none" viewBox="0 0 24 24"><path fill="#2684FF" d="M2.300 3a.7.700 0 0 0-.7.800l2.900 17.300c.1.500.5.900 1 .9h13.200c.4 0 .7-.3.800-.7l2.900-17.500a.7.700 0 0 0-.7-.8zm11.900 12.500H9.900L8.800 9.300h6.500z"/></symbol>
+  <symbol id="b-notion" stroke="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#fff" stroke="#111" stroke-width="1.600"/><path fill="#111" d="M8 7.500h2.300l4.200 6.300V7.500H16.300v9H14.100L9.800 10.100v6.400H8z"/></symbol>
+  <symbol id="b-gdocs" stroke="none" viewBox="0 0 24 24"><path fill="#4285F4" d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path fill="#A1C2FA" d="M14 2v5h5z"/><path fill="#fff" d="M8.500 11h7v1.300h-7zm0 2.800h7v1.300h-7zm0 2.800h4.500v1.300H8.500z"/></symbol>
+  <symbol id="b-slack" stroke="none" viewBox="0 0 24 24"><rect x="9.500" y="2" width="3" height="8" rx="1.500" fill="#36C5F0"/><rect x="2" y="9.500" width="8" height="3" rx="1.500" fill="#2EB67D" transform="translate(0 2)"/><rect x="11.500" y="14" width="3" height="8" rx="1.500" fill="#ECB22E"/><rect x="14" y="9.500" width="8" height="3" rx="1.500" fill="#E01E5A"/><circle cx="6.500" cy="8" r="1.500" fill="#36C5F0"/><circle cx="16" cy="6.500" r="1.500" fill="#E01E5A" transform="translate(1.500 0)"/><circle cx="8" cy="17.500" r="1.500" fill="#2EB67D"/><circle cx="17.500" cy="16" r="1.500" fill="#ECB22E"/></symbol>
+</svg>
+
+<!-- ============ HEADER ============ -->
+<header class="hdr" id="hdr">
+  <div class="hdr__in">
+    <button class="pill-btn" id="menuBtn" aria-expanded="false" aria-controls="menu"><svg><use href="#i-menu"/></svg><span data-en="MENU">MENÜ</span></button>
+    <a class="hdr__logo" href="#top" aria-label="VibeBoss.ai">
+      <img class="only-dark" src="assets/brand/vibeboss-logo-flat-on-dark.svg" alt="VibeBoss.ai" width="213" height="52">
+      <img class="only-light" src="assets/brand/vibeboss-logo-flat.svg" alt="VibeBoss.ai" width="213" height="52">
+    </a>
+    <div class="hdr__right">
+      <button class="icon-btn lang" id="langBtn" aria-label="Sprache wechseln / Switch language"><svg><use href="#i-globe"/></svg><b id="langLabel">DE</b></button>
+      <button class="icon-btn" id="themeBtn" aria-label="Hell/Dunkel umschalten"><svg class="only-dark"><use href="#i-sun"/></svg><svg class="only-light"><use href="#i-moon"/></svg></button>
+      <a class="btn btn--sm hdr__cta" href="#start"><svg><use href="#i-users"/></svg><span data-en="Join Community">Community beitreten</span></a>
+    </div>
+  </div>
+</header>
+
+<!-- Menü-Overlay -->
+<nav class="menu" id="menu" aria-hidden="true">
+  <div class="menu__in">
+    <a href="#problem" data-en="The problem">Das Problem</a>
+    <a href="#ablauf" data-en="How it works">So funktioniert's</a>
+    <a href="#loesung" data-en="The solution">Die Lösung</a>
+    <a href="#editor" data-en="Fine-tuning">Feinjustieren</a>
+    <a href="#teams" data-en="Who it's for">Für wen</a>
+    <a href="#faq">FAQ</a>
+    <a class="btn btn--lg" href="#start"><span data-en="Start free">Kostenlos starten</span><svg><use href="#i-arrow"/></svg></a>
+  </div>
+</nav>
+
+<main id="top">
+
+<!-- ============ 1 · HERO ============ -->
+<section class="s hero">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap center">
+    <a class="news" href="#loesung" data-a="up"><b data-en="What's New">Neu</b><span data-en="Release videos straight from your repository.">Release-Videos direkt aus deinem Repository.</span><svg><use href="#i-chev-r"/></svg></a>
+    <h1 class="h1" data-split data-en="You ship software every week.&lt;br&gt;&lt;em&gt;Nobody notices.&lt;/em&gt;">Du shippst jede Woche Software.<br><em>Niemand bekommt es mit.</em></h1>
+    <p class="lead" data-a="up" data-en="VibeBoss turns your GitHub commits into finished videos in your own design – with voice, music and in every format.">VibeBoss macht aus deinen GitHub-Commits fertige Videos im eigenen Design – mit Stimme, Musik und in jedem Format.</p>
+    <div class="hero__video" data-a="scale">
+      <button class="player" data-video aria-label="Video abspielen">
+        <img decoding="async" src="assets/img/presenter-wide.webp" alt="VibeBoss Beispielvideo" width="1400" height="933" fetchpriority="high">
+        <span class="player__play"><svg><use href="#i-play"/></svg></span>
+        <span class="player__badge"><svg><use href="#vb"/></svg></span>
+      </button>
+    </div>
+    <div data-a="up"><a class="btn btn--xl" href="#start"><span data-en="Start free today">Jetzt kostenlos starten</span><svg><use href="#i-arrow"/></svg></a></div>
+    <!-- PLATZHALTER: Social Proof vor Livegang durch echte Zahl/Kunden ersetzen -->
+    <div class="proof" data-a="up">
+      <div class="stack"><img decoding="async" src="assets/img/avatars/b1.webp" alt=""><img decoding="async" src="assets/img/avatars/b3.webp" alt=""><img decoding="async" src="assets/img/avatars/a2.webp" alt=""><img decoding="async" src="assets/img/avatars/a4.webp" alt=""></div>
+      <p data-en="&lt;b&gt;Built for&lt;/b&gt; SaaS founders, product teams,&lt;br&gt;DevRel &amp; agencies"><b>Gemacht für</b> SaaS-Gründer, Produktteams,<br>DevRel &amp; Agenturen</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 · PROBLEM ============ -->
+<section class="s problem" id="problem">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap split">
+    <div>
+      <h2 class="h2" data-split data-en="Nobody sees your best features.">Deine besten Features sieht niemand.</h2>
+      <p class="lead lead--l" data-a="up" data-en="Your team ships something new every week. But outside the team, hardly anyone notices. A good feature video takes time, know-how and coordination – and often ends up generic anyway.">Dein Team shippt jede Woche Neues. Aber außerhalb des Teams bekommt das kaum jemand mit. Ein gutes Feature-Video kostet Zeit, Know-how und Abstimmung – und oft bleibt es am Ende doch generisch.</p>
+      <div class="cards-v" data-stagger>
+        <div class="card row"><span class="tile"><svg><use href="#i-users"/></svg></span><div><b data-en="Agencies don't know your product.">Agenturen kennen dein Produkt nicht.</b><span data-en="External teams take a long time to really understand your product.">Externe Teams brauchen lange, um dein Produkt wirklich zu verstehen.</span></div></div>
+        <div class="card row"><span class="tile"><svg><use href="#i-clock"/></svg></span><div><b data-en="Your team has no time for video production.">Dein Team hat keine Zeit für Video-Produktion.</b><span data-en="Developers and product people are at capacity – video isn't their core job.">Entwickler und Produktleute sind ausgelastet – Video ist nicht ihr Kernjob.</span></div></div>
+        <div class="card row"><span class="tile"><svg><use href="#i-file"/></svg></span><div><b data-en="Template tools don't explain your feature properly.">Template-Tools erklären dein Feature nicht richtig.</b><span data-en="In the end everything looks interchangeable and explains too little.">Am Ende sieht alles austauschbar aus und erklärt zu wenig.</span></div></div>
+      </div>
+    </div>
+    <div class="pvis dk" data-a="fade">
+      <img decoding="async" class="pvis__img" src="assets/img/problem.webp" alt="" width="1400" height="933" loading="lazy">
+      <svg class="pvis__arrows" viewBox="0 0 800 520" aria-hidden="true"><path d="M300 78c40-18 70-8 84 16"/><path d="M130 100c-18 40 20 60 60 78"/><path d="M196 222c20-10 30-10 44 0"/><path d="M660 150c14 12 12 28 4 40"/><path d="M440 216c30-12 60-10 80 6"/><path d="M664 270c8 10 8 20 2 30"/><path d="M90 276c-10 8-10 16-4 24"/></svg>
+      <span class="chip chip--1" data-float="-18"><svg><use href="#i-file"/></svg><i data-en="Write script">Script schreiben</i></span>
+      <span class="chip chip--2" data-float="-34"><svg><use href="#i-scissors"/></svg><i data-en="Edit video">Video schneiden</i></span>
+      <span class="chip chip--3" data-float="-12"><svg><use href="#i-search"/></svg><i data-en="Find the story">Story finden</i></span>
+      <span class="chip chip--4" data-float="-26"><svg><use href="#i-mic"/></svg><i data-en="Record voice">Stimme aufnehmen</i></span>
+      <span class="chip chip--5 chip--red" data-float="-40"><svg><use href="#i-alert"/></svg><i data-en="Too much effort">Zu viel Aufwand</i></span>
+      <span class="ghost ghost--1"></span><span class="ghost ghost--2"></span><span class="ghost ghost--3"><svg><use href="#i-play"/></svg></span>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="inline-proof" data-a="up">
+      <div class="stack"><img decoding="async" src="assets/img/avatars/a1.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/b2.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a3.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a4.webp" alt="" loading="lazy"></div>
+      <span class="sep"></span><p data-en="Many product teams know exactly this problem.">Viele Produktteams kennen genau dieses Problem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · ABLAUF ============ -->
+<section class="s process" id="ablauf">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap center">
+    <h2 class="h2 h2--xl" data-split data-en="Connect once.&lt;br&gt;The rest runs almost by itself.">Einmal verbinden.<br>Der Rest läuft fast von selbst.</h2>
+    <p class="lead lead--c" data-a="up" data-en="VibeBoss scans your sources, understands the changes, writes the script, creates the scenes and renders your video automatically. You only step in when you want to change something.">VibeBoss scannt deine Quellen, versteht die Änderungen, schreibt das Skript, erzeugt die Szenen und rendert dein Video automatisch. Du steigst nur ein, wenn du etwas ändern willst.</p>
+
+    <div class="steps" data-stagger>
+      <article class="step">
+        <div class="mini mini--apps"><span><svg><use href="#b-github"/></svg></span><span><svg><use href="#b-gitlab"/></svg></span><span><svg><use href="#b-notion"/></svg></span><span><svg class="st"><use href="#i-globe"/></svg></span><span><svg><use href="#b-gdocs"/></svg></span><span><svg><use href="#b-slack"/></svg></span></div>
+        <h3 data-en="Connect">Verbinden</h3><p data-en="Link your repository, website, docs or release notes.">Repository, Website, Doku oder Release Notes koppeln.</p>
+      </article>
+      <span class="step__arr"><svg><use href="#i-arrow"/></svg></span>
+      <article class="step">
+        <div class="mini mini--commits">
+          <div><svg class="c-lime"><use href="#i-branch"/></svg><p><b>feat: new dashboard</b><i data-en="2 hours ago">vor 2 Stunden</i></p></div>
+          <div><svg class="c-red"><use href="#i-bug"/></svg><p><b>fix: export bug</b><i data-en="5 hours ago">vor 5 Stunden</i></p></div>
+          <div><svg class="c-blue"><use href="#i-file"/></svg><p><b>docs: api update</b><i data-en="1 day ago">vor 1 Tag</i></p></div>
+        </div>
+        <h3 data-en="Scan">Scannen</h3><p data-en="Reads commits, pull requests and content automatically.">Commits, Pull Requests und Inhalte automatisch lesen.</p>
+      </article>
+      <span class="step__arr"><svg><use href="#i-arrow"/></svg></span>
+      <article class="step">
+        <div class="mini mini--read">
+          <div class="doc"><i></i><i></i><i class="hl"></i><i></i><i></i><i class="hl"></i><i></i><i class="sh"></i></div>
+          <div class="tags"><b class="t-lime" data-en="New feature">Neues Feature</b><b data-en="Improvement">Verbesserung</b><b>Bugfix</b><b class="t-vio" data-en="Key change">Wichtige Änderung</b></div>
+        </div>
+        <h3 data-en="Understand">Verstehen</h3><p data-en="Detects important features and product changes.">Wichtige Features und Produktänderungen erkennen.</p>
+      </article>
+      <span class="step__arr"><svg><use href="#i-arrow"/></svg></span>
+      <article class="step">
+        <div class="mini mini--gen">
+          <div><span><svg><use href="#i-file"/></svg><i data-en="Write script">Skript erstellen</i></span><em class="pv pv--lines"><u></u><u></u><u></u></em></div>
+          <div><span><svg><use href="#i-mic"/></svg><i data-en="Create voice-over">Voice-over erzeugen</i></span><em class="pv pv--wave"></em></div>
+          <div><span><svg><use href="#i-image"/></svg><i data-en="Generate scenes">Szenen generieren</i></span><em class="pv pv--img"></em></div>
+          <div><span><svg><use href="#i-playc"/></svg><i data-en="Render video">Video rendern</i></span><em class="pv pv--tl"><u></u></em></div>
+        </div>
+        <h3 data-en="Generate">Generieren</h3><p data-en="Creates script, voice-over, scenes and visuals.">Skript, Voice-over, Szenen und Visuals erzeugen.</p>
+      </article>
+      <span class="step__arr"><svg><use href="#i-arrow"/></svg></span>
+      <article class="step step--out">
+        <div class="mini mini--video"><img decoding="async" src="assets/img/presenter-wide-sm.webp" alt="" loading="lazy"><span class="player__play player__play--sm"><svg><use href="#i-play"/></svg></span><div class="bar"><u></u><i>0:00 / 2:34</i></div></div>
+        <h3 data-en="Deliver">Ausliefern</h3><p data-en="Provides video, subtitles, thumbnail and post copy.">Video, Untertitel, Thumbnail und Post-Text bereitstellen.</p>
+      </article>
+    </div>
+
+    <div class="perks" data-stagger>
+      <div class="perk"><svg><use href="#i-camoff"/></svg><b data-en="No camera needed">Keine Kamera nötig</b></div>
+      <div class="perk"><svg><use href="#i-usersoff"/></svg><b data-en="No agency needed">Keine Agentur nötig</b></div>
+      <div class="perk"><svg><use href="#i-zap"/></svg><b data-en="Ready in minutes">In wenigen Minuten bereit</b></div>
+      <div class="perk perk--alt"><span class="tile tile--ghost"><svg><use href="#i-pencil"/></svg></span><b data-en="You can step in at any time.">Du kannst jederzeit eingreifen.</b>
+        <svg class="perk__curve" viewBox="0 0 80 150" aria-hidden="true"><path d="M30 2c50 30 50 100 8 140"/><path d="m38 128-2 15 15-3"/></svg>
+      </div>
+    </div>
+
+    <!-- PLATZHALTER-Testimonial: vor Livegang durch echte Kundenstimme ersetzen -->
+    <figure class="tq" data-a="up">
+      <img decoding="async" src="assets/img/avatars/a4.webp" alt="" loading="lazy">
+      <div><span class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span>
+      <blockquote data-en="“The process is finally clear and fast.”">„Der Ablauf ist endlich klar und schnell.“</blockquote><figcaption data-en="Product team">Produktteam</figcaption></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 4 · LÖSUNG ============ -->
+<section class="s solution" id="loesung">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap split split--sol">
+    <div>
+      <h2 class="h2" data-split data-en="VibeBoss turns your updates into videos automatically&lt;em&gt;.&lt;/em&gt;">VibeBoss macht aus deinen Updates automatisch Videos<em>.</em></h2>
+      <p class="lead lead--l" data-a="up" data-en="You connect VibeBoss once to your repository and your data sources. From then on VibeBoss scans source code, commits, pull requests, release notes and product copy, detects what matters to users and builds a finished video from it.">Du verbindest VibeBoss einmal mit deinem Repository und deinen Datenquellen. Danach scannt VibeBoss Quellcode, Commits, Pull Requests, Release Notes und Produkttexte, erkennt, was für Nutzer wichtig ist, und baut daraus ein fertiges Video.</p>
+      <div class="cards-v" data-stagger>
+        <div class="card row"><span class="tile tile--lg"><svg><use href="#i-db"/></svg></span><div><b data-en="All sources in view">Alle Quellen im Blick</b><span data-en="Code, commits, releases and docs are read automatically.">Code, Commits, Releases und Doku werden automatisch gelesen.</span></div></div>
+        <div class="card row"><span class="tile tile--lg"><svg><use href="#i-search"/></svg></span><div><b data-en="Spot what's relevant">Relevantes erkennen</b><span data-en="VibeBoss filters out the noise and finds the important changes.">VibeBoss filtert Rauschen und findet die wichtigen Änderungen.</span></div></div>
+        <div class="card row"><span class="tile tile--lg"><svg><use href="#i-playc"/></svg></span><div><b data-en="Produce a finished video">Fertiges Video erzeugen</b><span data-en="With hook, voice-over, scenes and subtitles.">Mit Hook, Sprecherstimme, Szenen und Untertiteln.</span></div></div>
+      </div>
+    </div>
+
+    <div class="solr">
+      <div class="dia" data-a="fade">
+        <svg class="dia__lines" viewBox="0 0 860 620" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M182 50 C 240 50, 240 250, 262 262"/><path d="M182 132 C 225 132, 228 268, 258 282"/><path d="M182 214 C 215 214, 220 290, 256 300"/>
+          <path d="M182 300 H 256"/><path d="M182 392 C 215 392, 220 330, 256 322"/><path d="M182 476 C 232 476, 232 350, 260 340"/>
+          <path class="out" d="M320 245 V 190 C 320 165, 335 160, 366 160"/><path class="out" d="M388 316 C 440 316, 430 420, 478 420"/>
+        </svg>
+        <div class="dia__src" data-stagger>
+          <span><svg><use href="#b-github"/></svg>GitHub</span>
+          <span><svg><use href="#b-gitlab"/></svg>GitLab</span>
+          <span><svg><use href="#b-bitbucket"/></svg>Bitbucket</span>
+          <span><svg class="st"><use href="#i-file"/></svg><i data-en="Website / App&lt;br&gt;Documentation">Website / App<br>Dokumentation</i></span>
+          <span><svg class="st"><use href="#i-list"/></svg>Release Notes</span>
+          <span><svg class="st"><use href="#i-branch"/></svg>Pull Requests</span>
+        </div>
+        <div class="dia__hub"><span><svg><use href="#vb"/></svg></span><b>VibeBoss.ai</b></div>
+        <div class="dia__player" data-float="-20">
+          <img decoding="async" src="assets/img/presenter-wide.webp" alt="" loading="lazy">
+          <div class="codecard"><b>v2.0</b><svg><use href="#i-branch"/></svg><u></u><u class="g"></u><u class="g sh"></u><u class="r"></u><u class="g"></u><u class="g sh"></u></div>
+          <div class="pbar"><svg><use href="#i-play"/></svg><i>0:00 / 2:34</i><u></u><svg><use href="#i-volume"/></svg><svg><use href="#i-expand"/></svg></div>
+        </div>
+        <div class="dia__port dia__port--1" data-float="-36"><img decoding="async" src="assets/img/presenter-tall.webp" alt="" loading="lazy"><p data-en="Our new&lt;br&gt;&lt;em&gt;feature is&lt;/em&gt; here!">Unser neues<br><em>Feature ist</em> da!</p><u></u></div>
+        <div class="dia__port dia__port--2" data-float="-52"><img decoding="async" src="assets/img/presenter-square.webp" alt="" loading="lazy"><span class="pr"><svg><use href="#i-branch"/></svg></span><p class="big">Version 2.0</p><u></u></div>
+      </div>
+      <!-- PLATZHALTER-Testimonial -->
+      <figure class="tq tq--left" data-a="up">
+        <div class="stack"><img decoding="async" src="assets/img/avatars/b1.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a2.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/b3.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a4.webp" alt="" loading="lazy"></div>
+        <div><span class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span>
+        <blockquote data-en="“This is exactly how release communication should work today.”">„Genau so sollte Release-Kommunikation heute funktionieren.“</blockquote><figcaption data-en="Product marketing">Produktmarketing</figcaption></div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · EDITOR ============ -->
+<section class="s editor" id="editor">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap center">
+    <h2 class="h2 h2--xl" data-split data-en="Created automatically.&lt;br&gt;&lt;em&gt;Fine-tuned by you.&lt;/em&gt;">Automatisch erstellt.<br><em>Von dir feinjustiert.</em></h2>
+    <p class="lead lead--c" data-a="up" data-en="VibeBoss builds the first draft automatically. After that you can change copy, swap scenes, generate new variants and have your brand colours, fonts and logos applied.">VibeBoss baut dir den ersten Entwurf automatisch. Danach kannst du Texte ändern, Szenen tauschen, neue Varianten generieren und deine Brandingfarben, Schriften und Logos übernehmen lassen.</p>
+
+    <div class="ed-grid">
+      <div class="ed dk" data-a="up">
+        <aside class="ed__side">
+          <div class="ed__tabs"><b class="on"><svg><use href="#i-file"/></svg><span data-en="Script">Skript</span></b><b><svg><use href="#i-list"/></svg><span data-en="Scenes">Szenen</span></b></div>
+          <ol class="ed__scenes">
+            <li class="on" data-t="0"><i>1</i><span class="th th--p"></span><p><b>Hook</b><em>0:05</em><u></u><u class="sh"></u></p></li>
+            <li data-t="1"><i>2</i><span class="th th--cal"></span><p><b>Problem</b><em>0:08</em><u></u><u class="sh"></u></p></li>
+            <li data-t="2"><i>3</i><span class="th th--list"></span><p><b data-en="Solution / Feature">Lösung / Feature</b><em>0:10</em><u></u><u class="sh"></u></p></li>
+            <li data-t="3"><i>4</i><span class="th th--p"></span><p><b>Social Proof</b><em>0:08</em><u></u><u class="sh"></u></p></li>
+            <li data-t="4"><i>5</i><span class="th th--vb"><svg><use href="#vb"/></svg></span><p><b>CTA</b><em>0:05</em><u></u><u class="sh"></u></p></li>
+          </ol>
+        </aside>
+        <div class="ed__main">
+          <div class="ed__stage">
+            <img decoding="async" src="assets/img/presenter-wide.webp" alt="" loading="lazy">
+            <span class="bub bub--1" data-float="-14"><svg><use href="#i-pencil"/></svg><i data-en="Make the hook shorter">Mach die Hook kürzer</i></span>
+            <span class="bub bub--2" data-float="-28"><svg><use href="#i-cal"/></svg><i data-en="Show the calendar here">Zeig hier den Kalender</i></span>
+            <span class="bub bub--3" data-float="-20"><svg><use href="#i-sparkles"/></svg><i data-en="Less playful">Weniger verspielt</i></span>
+            <span class="bub bub--4" data-float="-10"><svg><use href="#i-list"/></svg><i data-en="More focus on the feature">Mehr Fokus auf das Feature</i></span>
+            <div class="pbar pbar--ed"><svg><use href="#i-play"/></svg><i id="edTime">0:03 / 0:28</i><u><b id="edProg"></b></u><svg><use href="#i-expand"/></svg></div>
+          </div>
+          <div class="ed__tl">
+            <span class="th th--p"></span><span class="th th--cal"></span><span class="th th--list"></span><span class="th th--p"></span><span class="th th--vb"><svg><use href="#vb"/></svg></span>
+            <i class="ed__head" id="edHead"></i>
+            <button class="btn btn--gen" type="button" id="genBtn"><svg><use href="#i-sparkles"/></svg><span data-en="Generate new variant">Neue Variante generieren</span><svg class="cur"><use href="#i-cursor"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand dk" data-a="up">
+        <div class="brand__col"><h3 data-en="Your brand">Deine Marke</h3>
+        <div class="brand__row">
+          <div class="brand__box"><small>Logo</small><span class="brand__logo"><svg><use href="#vb"/></svg></span><em data-en="Upload logo">Logo hochladen</em></div>
+          <div class="brand__box brand__box--w">
+            <small data-en="Colours">Farben</small>
+            <div class="sw" id="swatches"><button class="on" style="--c:#CCFB1E" aria-label="Lime"></button><button style="--c:#2f6b0a" aria-label="Grün"></button><button style="--c:#0c0d0b" aria-label="Schwarz"></button><button style="--c:#f4f6f0" aria-label="Weiß"></button></div>
+            <small data-en="Fonts">Schriften</small>
+            <div class="fonts"><b class="on">Aa<i>Inter</i><u>Modern &amp; Clean</u></b><b>Aa<i>Manrope</i><u>Modern &amp; Friendly</u></b></div>
+          </div>
+        </div>
+        </div>
+        <div class="brand__col"><h3 data-en="Before / After">Vorher / Nachher</h3>
+        <div class="ba">
+          <figure class="ba__a"><img decoding="async" src="assets/img/presenter-wide-sm.webp" alt="" loading="lazy"><b data-en="Generic output">Generischer Output</b><figcaption data-en="How to create professional videos…">So einfach erstellst du professionelle Videos…</figcaption></figure>
+          <svg><use href="#i-arrow"/></svg>
+          <figure class="ba__b"><img decoding="async" src="assets/img/presenter-wide-sm.webp" alt="" loading="lazy"><b data-en="With your brand">Mit deiner Marke</b><span class="player__badge player__badge--sm"><svg><use href="#vb"/></svg></span><figcaption data-en="How to create professional videos with Vibe&lt;em&gt;Boss.&lt;/em&gt;">So einfach erstellst du professionelle Videos mit Vibe<em>Boss.</em></figcaption></figure>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat4" data-stagger>
+      <div class="card row"><span class="tile tile--lg"><svg><use href="#i-pencil"/></svg></span><div><b data-en="Change copy">Text ändern</b><span data-en="Right in the script or by instruction.">Direkt im Skript oder per Anweisung.</span></div></div>
+      <div class="card row"><span class="tile tile--lg"><svg><use href="#i-image"/></svg></span><div><b data-en="Adjust scenes">Szenen anpassen</b><span data-en="Change images, order and focus.">Bilder, Reihenfolge und Fokus ändern.</span></div></div>
+      <div class="card row"><span class="tile tile--lg"><svg><use href="#i-refresh"/></svg></span><div><b data-en="New variants">Neue Varianten</b><span data-en="Regenerate hooks and versions.">Hooks und Versionen neu generieren.</span></div></div>
+      <div class="card row"><span class="tile tile--lg"><svg><use href="#i-palette"/></svg></span><div><b data-en="Apply your brand">Marke übernehmen</b><span data-en="Colours, logo and style applied automatically.">Farben, Logo und Stil automatisch anwenden.</span></div></div>
+    </div>
+
+    <!-- PLATZHALTER-Testimonial -->
+    <figure class="tq" data-a="up">
+      <div class="stack"><img decoding="async" src="assets/img/avatars/b1.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/b2.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/b3.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a2.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a3.webp" alt="" loading="lazy"></div>
+      <div><span class="stars stars--acc"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span>
+      <blockquote class="sm" data-en="“It feels like our product team suddenly has its own video team.”">„Es fühlt sich an, als hätte unser Produktteam plötzlich ein eigenes Video-Team.“</blockquote><figcaption data-en="SaaS founder">SaaS-Founder</figcaption></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 6 · TEAMS ============ -->
+<section class="s teams" id="teams">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap">
+    <div class="teams__grid">
+      <div class="teams__copy">
+        <h2 class="h2" data-split data-en="For teams that want to make releases visible.">Für Teams, die Releases sichtbar machen wollen.</h2>
+        <p class="lead lead--l" data-a="up" data-en="Whether SaaS founder, product marketing, DevRel or agency – VibeBoss makes sure real product changes quickly go out as easy-to-understand videos.">Ob SaaS-Gründer, Produktmarketing, DevRel oder Agentur – VibeBoss sorgt dafür, dass echte Produktänderungen schnell als verständliche Videos nach außen gehen.</p>
+        <div class="aud" data-stagger>
+          <div class="card row"><span class="tile tile--lg"><svg><use href="#i-users"/></svg></span><div><b data-en="SaaS founders &amp; product teams">SaaS-Gründer &amp; Produktteams</b><span data-en="Make new features visible.">Neue Features sichtbar machen.</span></div></div>
+          <div class="card row"><span class="tile tile--lg"><svg><use href="#i-megaphone"/></svg></span><div><b data-en="Product marketing">Produktmarketing</b><span data-en="Explainer videos in your corporate design.">Erklärvideos im Corporate Design.</span></div></div>
+          <div class="card row"><span class="tile tile--lg"><svg><use href="#i-code"/></svg></span><div><b>DevRel &amp; Open Source</b><span data-en="Changelog videos straight from pull requests.">Changelog-Videos direkt aus Pull Requests.</span></div></div>
+          <div class="card row"><span class="tile tile--lg"><svg><use href="#i-building"/></svg></span><div><b data-en="Agencies">Agenturen</b><span data-en="More brands, delivered faster.">Mehr Marken, schneller liefern.</span></div></div>
+        </div>
+      </div>
+
+      <div class="get card" data-a="up">
+        <h3 data-en="What you get">Was du bekommst</h3>
+        <ul data-stagger>
+          <li><span class="tile"><svg><use href="#i-playc"/></svg></span><b data-en="Video in full quality">Video in voller Qualität</b></li>
+          <li><span class="tile"><svg><use href="#i-mobile"/></svg></span><b data-en="Mobile version">Mobile Version</b></li>
+          <li><span class="tile"><svg><use href="#i-file"/></svg></span><b data-en="Subtitle file">Untertiteldatei</b></li>
+          <li><span class="tile"><svg><use href="#i-image"/></svg></span><b>Thumbnail</b></li>
+          <li><span class="tile"><svg><use href="#i-hash"/></svg></span><b data-en="Caption with title &amp; hashtags">Begleittext mit Titel &amp; Hashtags</b></li>
+          <li class="soon"><span class="tile tile--ghost"><svg><use href="#i-zap"/></svg></span><b data-en="Soon: post directly">Bald: direkt posten</b><em>Coming Soon</em></li>
+        </ul>
+      </div>
+
+      <div class="fmt" data-stagger>
+        <figure class="fmt__a"><img decoding="async" src="assets/img/presenter-wide.webp" alt="" loading="lazy"><b>16:9</b><span class="player__play player__play--sm"><svg><use href="#i-play"/></svg></span><u><i></i></u></figure>
+        <figure class="fmt__b"><img decoding="async" src="assets/img/presenter-tall.webp" alt="" loading="lazy"><b>9:16</b><span class="player__play player__play--xs"><svg><use href="#i-play"/></svg></span><u><i></i></u></figure>
+        <figure class="fmt__c"><img decoding="async" src="assets/img/presenter-square.webp" alt="" loading="lazy"><b>1:1</b><span class="player__play player__play--xs"><svg><use href="#i-play"/></svg></span><u><i></i></u></figure>
+        <figure class="fmt__d"><img decoding="async" src="assets/img/presenter-tall.webp" alt="" loading="lazy"><b>4:5</b><span class="player__play player__play--xs"><svg><use href="#i-play"/></svg></span><u><i></i></u></figure>
+      </div>
+    </div>
+
+    <!-- PLATZHALTER-Testimonials: vor Livegang durch echte Kundenstimmen ersetzen -->
+    <div class="t3" data-stagger>
+      <figure class="card tcard"><img decoding="async" src="assets/img/avatars/a1.webp" alt="" loading="lazy"><div><span class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span><blockquote data-en="“Finally we can turn our feature releases into professional videos in minutes. That saves us an enormous amount of time.”">„Endlich können wir unsere Feature-Releases in Minuten in professionelle Videos verwandeln. Das spart uns enorm viel Zeit.“</blockquote><figcaption>Founder</figcaption></div></figure>
+      <figure class="card tcard"><img decoding="async" src="assets/img/avatars/a2.webp" alt="" loading="lazy"><div><span class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span><blockquote data-en="“The videos look modern, fit our branding perfectly and help us communicate our features much better.”">„Die Videos sehen modern aus, passen perfekt zu unserem Branding und helfen uns, unsere Features viel besser zu kommunizieren.“</blockquote><figcaption data-en="Product marketing">Produktmarketing</figcaption></div></figure>
+      <figure class="card tcard"><img decoding="async" src="assets/img/avatars/a3.webp" alt="" loading="lazy"><div><span class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span><blockquote data-en="“We now deliver changelog videos for several clients at once – fast, consistent and in top quality.”">„Wir liefern jetzt für mehrere Kunden gleichzeitig Changelog-Videos – schnell, konsistent und in Top-Qualität.“</blockquote><figcaption data-en="Agency">Agentur</figcaption></div></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7 · FAQ ============ -->
+<section class="s faq" id="faq">
+  <i class="glow glow--l"></i><i class="glow glow--r"></i>
+  <div class="wrap center">
+    <h2 class="h2 h2--xl" data-split data-en="Common questions.&lt;br&gt;Quick answers.">Häufige Fragen.<br>Schnelle Antworten.</h2>
+    <div class="faq__grid" data-stagger>
+      <details class="card qa"><summary><span class="tile tile--lg"><svg><use href="#i-playc"/></svg></span><div><b data-en="Do I need video experience?">Brauche ich Video-Erfahrung?</b><span data-en="No. VibeBoss handles most of it automatically.">Nein. VibeBoss übernimmt den Großteil automatisch.</span></div><svg class="qa__chev"><use href="#i-chev"/></svg></summary><p data-en="Script, voice-over, scenes and editing are created for you. You only review the draft and adjust what you like.">Skript, Voice-over, Szenen und Schnitt werden für dich erstellt. Du prüfst nur den Entwurf und passt an, was du möchtest.</p></details>
+      <details class="card qa"><summary><span class="tile tile--lg"><svg><use href="#i-db"/></svg></span><div><b data-en="How does VibeBoss know what's new?">Woher weiß VibeBoss, was neu ist?</b><span data-en="From code, commits, pull requests and releases.">Aus Code, Commits, Pull Requests und Releases.</span></div><svg class="qa__chev"><use href="#i-chev"/></svg></summary><p data-en="VibeBoss compares the state of your sources, filters out internal noise and summarises what's relevant for your users.">VibeBoss vergleicht den Stand deiner Quellen, filtert internes Rauschen heraus und fasst zusammen, was für deine Nutzer relevant ist.</p></details>
+      <details class="card qa"><summary><span class="tile tile--lg"><svg><use href="#i-code"/></svg></span><div><b data-en="Can I change things?">Kann ich Dinge ändern?</b><span data-en="Yes. You can adjust copy, scenes and variants.">Ja. Du kannst Texte, Szenen und Varianten anpassen.</span></div><svg class="qa__chev"><use href="#i-chev"/></svg></summary><p data-en="Edit right in the script or give an instruction like “make the hook shorter”. New variants are generated in moments.">Bearbeite direkt im Skript oder gib eine Anweisung wie „Mach die Hook kürzer“. Neue Varianten entstehen in wenigen Augenblicken.</p></details>
+      <details class="card qa"><summary><span class="tile tile--lg"><svg><use href="#i-brush"/></svg></span><div><b data-en="Does the result look like my brand?">Sieht das Ergebnis nach meiner Marke aus?</b><span data-en="Yes. Colours, logos and style can be applied.">Ja. Farben, Logos und Stil lassen sich übernehmen.</span></div><svg class="qa__chev"><use href="#i-chev"/></svg></summary><p data-en="Upload your logo, choose colours and fonts once – every new video then uses your brand automatically.">Lade dein Logo hoch, wähle Farben und Schriften einmal aus – jedes neue Video nutzt danach automatisch deine Marke.</p></details>
+      <details class="card qa"><summary><span class="tile tile--lg"><svg><use href="#i-shield"/></svg></span><div><b data-en="What happens to my code?">Was passiert mit meinem Code?</b><span data-en="VibeBoss only reads what's necessary.">VibeBoss liest nur, was nötig ist.</span></div><svg class="qa__chev"><use href="#i-chev"/></svg></summary><p data-en="Access is read-only and limited to the sources you approve. You can revoke the connection at any time.">Der Zugriff ist rein lesend und auf die Quellen beschränkt, die du freigibst. Du kannst die Verbindung jederzeit trennen.</p></details>
+      <details class="card qa"><summary><span class="tile tile--lg"><svg><use href="#i-link"/></svg></span><div><b data-en="Which sources can I connect?">Welche Quellen kann ich verbinden?</b><span data-en="Repository, release notes, website and other product sources.">Repository, Release Notes, Website und weitere Produktquellen.</span></div><svg class="qa__chev"><use href="#i-chev"/></svg></summary><p data-en="For example GitHub, GitLab and Bitbucket as well as documentation, websites and release notes.">Zum Beispiel GitHub, GitLab und Bitbucket sowie Dokumentation, Websites und Release Notes.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 · CTA ============ -->
+<section class="s cta" id="start">
+  <i class="glow glow--r glow--low"></i>
+  <div class="wrap split split--cta">
+    <div>
+      <h2 class="h2 h2--xl" data-split data-en="Your next release deserves a video.">Dein nächstes Release verdient ein Video.</h2>
+      <p class="lead lead--l" data-a="up" data-en="Connect VibeBoss. Let it scan your sources. Share the result.">Verbinde VibeBoss. Lass deine Quellen scannen. Teile das Ergebnis.</p>
+      <div class="cta__btns" data-a="up">
+        <!-- TODO: Ziel-URL der App/Anmeldung eintragen -->
+        <a class="btn btn--lg" href="#" data-signup><span data-en="Start free">Kostenlos starten</span><svg><use href="#i-arrow"/></svg></a>
+        <button class="btn btn--ghost btn--lg" type="button" data-video><svg><use href="#i-playc"/></svg><span data-en="Watch sample video">Beispielvideo ansehen</span></button>
+      </div>
+      <div class="proof proof--l" data-a="up">
+        <div class="stack"><img decoding="async" src="assets/img/avatars/b1.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/b2.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/b3.webp" alt="" loading="lazy"><img decoding="async" src="assets/img/avatars/a2.webp" alt="" loading="lazy"></div>
+        <p><span class="stars stars--acc"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span><span data-en="Loved by modern product teams.">Von modernen Produktteams geliebt.</span></p>
+      </div>
+    </div>
+    <div class="fan" data-a="fade">
+      <i class="fan__ring"></i><i class="fan__ring fan__ring--2"></i>
+      <div class="fan__c fan__c--5"></div>
+      <div class="fan__c fan__c--4"><img decoding="async" src="assets/img/presenter-square.webp" alt="" loading="lazy"></div>
+      <div class="fan__c fan__c--3 fan__c--chart"><u></u><u></u><u></u><u></u></div>
+      <div class="fan__c fan__c--2 fan__c--code"><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+      <div class="fan__c fan__c--1"><img decoding="async" src="assets/img/presenter-wide.webp" alt="" loading="lazy"><span class="player__play"><svg><use href="#i-play"/></svg></span><div class="fan__meta"><span><svg><use href="#vb"/></svg></span><p><u></u><u class="sh"></u></p></div></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <a href="#top"><img class="only-dark" src="assets/brand/vibeboss-logo-flat-on-dark.svg" alt="VibeBoss.ai" height="34"><img class="only-light" src="assets/brand/vibeboss-logo-flat.svg" alt="VibeBoss.ai" height="34"></a>
+    <nav><a href="#ablauf" data-en="How it works">So funktioniert's</a><a href="#teams" data-en="Who it's for">Für wen</a><a href="#faq">FAQ</a><a href="#" data-en="Imprint">Impressum</a><a href="#" data-en="Privacy">Datenschutz</a></nav>
+    <p>© 2026 VibeBoss.ai</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="assets/js/main.js?v=3" defer></script>
+</body>
+</html>
